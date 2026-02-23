@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+    <name>internautenb2bimport</name>
+    <displayName><![CDATA[Internauten B2B Import]]></displayName>
+    <version>1.0.0</version>
+    <description><![CDATA[Imports wholesale prices and sets specific prices by product reference.]]></description>
+    <author><![CDATA[die.internauten.ch]]></author>
+    <tab>pricing_promotion</tab>
+    <is_configurable>1</is_configurable>
+    <need_instance>0</need_instance>
+</module>

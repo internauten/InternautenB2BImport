@@ -1,0 +1,65 @@
+name: Build internautenb2bimport zip
+
+on:
+  push:
+    paths:
+      - 'internautenb2bimport/**'
+      - '.github/workflows/zip-internautenb2bimport.yml'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create zip
+        run: |
+          zip -r internautenb2bimport.zip internautenb2bimport
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: internautenb2bimport-zip
+          path: internautenb2bimport.zip
+          if-no-files-found: error
+
+      - name: Extract release notes
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "## $TAG" > release-notes.md
+          awk -v tag="$TAG" 'BEGIN{found=0} {sub(/\r$/,"")} $0 ~ "^##[[:space:]]+"tag"$"{found=1;next} found && $0 ~ "^##[[:space:]]+"{exit} found{print}' CHANGELOG.md >> release-notes.md
+          if [ $(wc -l < release-notes.md) -lt 2 ]; then
+            echo "- No changelog section found for $TAG." >> release-notes.md
+          fi
+          echo "" >> release-notes.md
+          echo "### Commits" >> release-notes.md
+          PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || true)
+          if [ -n "$PREV_TAG" ]; then
+            RANGE="$PREV_TAG..$TAG"
+          else
+            RANGE="$TAG"
+          fi
+          git log "$RANGE" --pretty=format:"- %s (%h, %an, %ad)%n%b" --date=short \
+            | awk '{if ($0 ~ /^- /) {print $0} else if (length($0) == 0) {print ""} else {print "  " $0}}' \
+            >> release-notes.md
+          if [ $(grep -c "^- " release-notes.md) -lt 2 ]; then
+            echo "- No changes found for $TAG." >> release-notes.md
+          fi
+
+      - name: Upload release asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: internautenb2bimport ${{ github.ref_name }}
+          body_path: release-notes.md
+          files: internautenb2bimport.zip
