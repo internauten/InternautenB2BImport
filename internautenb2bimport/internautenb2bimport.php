@@ -18,8 +18,8 @@ class InternautenB2BImport extends Module
     {
         $this->name = 'internautenb2bimport';
         $this->tab = 'pricing_promotion';
-        $this->version = '1.0.1';
-        $this->author = 'WoW B2B';
+        $this->version = '1.0.4';
+        $this->author = 'die.internauten.ch';
         $this->bootstrap = true;
 
         parent::__construct();

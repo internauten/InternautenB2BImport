@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.0.4
+
+- Display bereinigt
+
 ## v1.0.3
 
 - First public Version
