@@ -71,6 +71,23 @@ Notes:
 - The release text is taken from the matching section in `CHANGELOG.md`.
 - If no section is present, commit messages are used as release notes automatically.
 
+### Create and push tag from module version
+
+You can create and push a release tag directly from the version in `internautenb2bimport/internautenb2bimport.php` (`$this->version`) with:
+
+```bash
+./scripts/tag-from-module-version.sh
+```
+
+The script reads the module version, creates an annotated tag in the format `v<version>`, and pushes it to `origin`.
+
+Use a dry-run to preview the tag command without creating or pushing anything:
+
+```bash
+./scripts/tag-from-module-version.sh --dry-run
+```
+
+
 ## Development
 
 You can develop the module directly in the prestshop module folder. But not in the production environment! Make a copy to a test system of your production system.
@@ -99,4 +116,6 @@ You can find a short how to on Azure in [Readme of InternautenB2BOffer](https://
 
 ## License
 
-Academic Free License (AFL 3.0)
+This project is licensed under the MIT License. See details [`LICENSE`](LICENSE).
+
+Copyright (c) 2026 die.internauten.ch GmbH
