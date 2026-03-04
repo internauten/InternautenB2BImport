@@ -13,12 +13,13 @@ class InternautenB2BImport extends Module
     const CONFIG_CRON_TOKEN = 'INTERNAUTENB2BIMPORT_CRON_TOKEN';
     const CONFIG_TIMEOUT = 'INTERNAUTENB2BIMPORT_TIMEOUT';
     const CONFIG_DEBUG = 'INTERNAUTENB2BIMPORT_DEBUG';
+    const CONFIG_PRICE_IS_GROSS = 'INTERNAUTENB2BIMPORT_PRICE_IS_GROSS';
 
     public function __construct()
     {
         $this->name = 'internautenb2bimport';
         $this->tab = 'pricing_promotion';
-        $this->version = '1.0.4';
+        $this->version = '1.0.5';
         $this->author = 'die.internauten.ch';
         $this->bootstrap = true;
 
@@ -47,6 +48,7 @@ class InternautenB2BImport extends Module
         Configuration::updateValue(self::CONFIG_CRON_TOKEN, $defaultToken);
         Configuration::updateValue(self::CONFIG_TIMEOUT, 20);
         Configuration::updateValue(self::CONFIG_DEBUG, 0);
+        Configuration::updateValue(self::CONFIG_PRICE_IS_GROSS, 1);
 
         return true;
     }
@@ -58,6 +60,7 @@ class InternautenB2BImport extends Module
         Configuration::deleteByName(self::CONFIG_CRON_TOKEN);
         Configuration::deleteByName(self::CONFIG_TIMEOUT);
         Configuration::deleteByName(self::CONFIG_DEBUG);
+        Configuration::deleteByName(self::CONFIG_PRICE_IS_GROSS);
 
         return true;
     }
@@ -90,6 +93,7 @@ class InternautenB2BImport extends Module
         Configuration::updateValue(self::CONFIG_CRON_TOKEN, Tools::getValue(self::CONFIG_CRON_TOKEN));
         Configuration::updateValue(self::CONFIG_TIMEOUT, (int) Tools::getValue(self::CONFIG_TIMEOUT));
         Configuration::updateValue(self::CONFIG_DEBUG, (int) Tools::getValue(self::CONFIG_DEBUG));
+        Configuration::updateValue(self::CONFIG_PRICE_IS_GROSS, (int) Tools::getValue(self::CONFIG_PRICE_IS_GROSS));
     }
 
     private function runImport()
@@ -98,11 +102,15 @@ class InternautenB2BImport extends Module
         $groupId = (int) Configuration::get(self::CONFIG_GROUP_ID);
         $timeout = (int) Configuration::get(self::CONFIG_TIMEOUT);
         $debug = (bool) Configuration::get(self::CONFIG_DEBUG);
+        $priceIsGrossConfig = Configuration::get(self::CONFIG_PRICE_IS_GROSS);
+        $priceIsGross = ($priceIsGrossConfig === false || $priceIsGrossConfig === null || $priceIsGrossConfig === '')
+            ? true
+            : (bool) $priceIsGrossConfig;
         $shopId = (int) $this->context->shop->id;
 
         $importer = new InternautenB2BImporter($this->context);
 
-        return $importer->run($url, $groupId, $shopId, $timeout, $debug);
+        return $importer->run($url, $groupId, $shopId, $timeout, $debug, $priceIsGross);
     }
 
     private function renderForm()
@@ -177,6 +185,25 @@ class InternautenB2BImport extends Module
                         ),
                         'desc' => $this->l('Log reference and price for each import row.'),
                     ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->l('CSV prices include tax (gross)'),
+                        'name' => self::CONFIG_PRICE_IS_GROSS,
+                        'is_bool' => true,
+                        'values' => array(
+                            array(
+                                'id' => 'price_is_gross_on',
+                                'value' => 1,
+                                'label' => $this->l('Yes'),
+                            ),
+                            array(
+                                'id' => 'price_is_gross_off',
+                                'value' => 0,
+                                'label' => $this->l('No'),
+                            ),
+                        ),
+                        'desc' => $this->l('If enabled, imported CSV prices are converted from gross to net before saving specific prices.'),
+                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save'),
@@ -244,12 +271,17 @@ class InternautenB2BImport extends Module
 
     private function getConfigFormValues()
     {
+        $priceIsGrossConfig = Configuration::get(self::CONFIG_PRICE_IS_GROSS);
+
         return array(
             self::CONFIG_URL => Configuration::get(self::CONFIG_URL),
             self::CONFIG_GROUP_ID => Configuration::get(self::CONFIG_GROUP_ID),
             self::CONFIG_CRON_TOKEN => Configuration::get(self::CONFIG_CRON_TOKEN),
             self::CONFIG_TIMEOUT => Configuration::get(self::CONFIG_TIMEOUT),
             self::CONFIG_DEBUG => (int) Configuration::get(self::CONFIG_DEBUG),
+            self::CONFIG_PRICE_IS_GROSS => ($priceIsGrossConfig === false || $priceIsGrossConfig === null || $priceIsGrossConfig === '')
+                ? 1
+                : (int) $priceIsGrossConfig,
         );
     }
 

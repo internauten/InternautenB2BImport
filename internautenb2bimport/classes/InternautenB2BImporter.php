@@ -9,7 +9,7 @@ class InternautenB2BImporter
         $this->context = $context;
     }
 
-    public function run($url, $groupId, $shopId, $timeout, $debug)
+    public function run($url, $groupId, $shopId, $timeout, $debug, $priceIsGross = true)
     {
         $report = array(
             'created' => 0,
@@ -81,6 +81,15 @@ class InternautenB2BImporter
                     $this->logDebugReference($reference, $priceRaw, 'Invalid price, skipped', $debug);
                 }
                 continue;
+            }
+
+            if ($priceIsGross) {
+                $price = $this->convertGrossToNetPrice($idProduct, $price);
+                if ($price <= 0) {
+                    $report['skipped']++;
+                    $this->logDebugReference($reference, $priceRaw, 'Net price invalid after tax conversion, skipped', $debug);
+                    continue;
+                }
             }
 
             $result = $this->upsertSpecificPrice($idProduct, $groupId, $shopId, $price);
@@ -283,6 +292,38 @@ class InternautenB2BImporter
         }
 
         return (float) $clean;
+    }
+
+    private function convertGrossToNetPrice($idProduct, $grossPrice)
+    {
+        $grossPrice = (float) $grossPrice;
+        if ($grossPrice <= 0) {
+            return 0.0;
+        }
+
+        $taxRate = $this->getProductTaxRate($idProduct);
+        if ($taxRate <= 0) {
+            return $grossPrice;
+        }
+
+        return round($grossPrice / (1 + ($taxRate / 100)), 6);
+    }
+
+    private function getProductTaxRate($idProduct)
+    {
+        if (!class_exists('Tax')) {
+            return 0.0;
+        }
+
+        $taxRate = 0.0;
+
+        try {
+            $taxRate = (float) Tax::getProductTaxRate((int) $idProduct);
+        } catch (Exception $e) {
+            $taxRate = 0.0;
+        }
+
+        return $taxRate > 0 ? $taxRate : 0.0;
     }
 
     private function removeSpecificPrice($reference, $groupId, $shopId)

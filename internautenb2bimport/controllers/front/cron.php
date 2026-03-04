@@ -17,10 +17,15 @@ class Internautenb2bimportCronModuleFrontController extends ModuleFrontControlle
         $url = Configuration::get(InternautenB2BImport::CONFIG_URL);
         $groupId = (int) Configuration::get(InternautenB2BImport::CONFIG_GROUP_ID);
         $timeout = (int) Configuration::get(InternautenB2BImport::CONFIG_TIMEOUT);
+        $debug = (bool) Configuration::get(InternautenB2BImport::CONFIG_DEBUG);
+        $priceIsGrossConfig = Configuration::get(InternautenB2BImport::CONFIG_PRICE_IS_GROSS);
+        $priceIsGross = ($priceIsGrossConfig === false || $priceIsGrossConfig === null || $priceIsGrossConfig === '')
+            ? true
+            : (bool) $priceIsGrossConfig;
         $shopId = (int) $this->context->shop->id;
 
         $importer = new InternautenB2BImporter($this->context);
-        $report = $importer->run($url, $groupId, $shopId, $timeout);
+        $report = $importer->run($url, $groupId, $shopId, $timeout, $debug, $priceIsGross);
 
         header('Content-Type: application/json');
         echo json_encode($report);
