@@ -1,5 +1,10 @@
 # Internauten B2B Import (PrestaShop 1.7)
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-pink?logo=githubsponsors&style=flat-square)](https://github.com/sponsors/internauten)
+[![Stars](https://img.shields.io/github/stars/internauten/InternautenB2BImport?style=flat-square)](https://github.com/internauten/InternautenB2BImport/stargazers)
+[![Release](https://img.shields.io/github/v/release/internauten/InternautenB2BImport?style=flat-square)](https://github.com/internauten/InternautenB2BImport/releases)
+[![License](https://img.shields.io/github/license/internauten/InternautenB2BImport?style=flat-square)](LICENSE)
+
 This module imports price data from a remote URL and creates or updates a specific price for each product. Products are matched by `reference` (import field `Nummer`). The special price uses the import field `PreisGrossisten` and is applied to customer group ID `5` by default.
 
 ## TODO
