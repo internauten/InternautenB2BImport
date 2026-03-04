@@ -19,7 +19,7 @@ class InternautenB2BImport extends Module
     {
         $this->name = 'internautenb2bimport';
         $this->tab = 'pricing_promotion';
-        $this->version = '1.0.5';
+        $this->version = '1.0.6';
         $this->author = 'die.internauten.ch';
         $this->bootstrap = true;
 
