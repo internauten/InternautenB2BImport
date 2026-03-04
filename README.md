@@ -10,8 +10,9 @@ This module imports price data from a remote URL and creates or updates a specif
 
 ## Install
 
-1. Copy the `internautenb2bimport` folder into your PrestaShop `modules` directory.
-2. In the Back Office, go to Modules and install **Internauten B2B Import**.
+1. Download zip of latest release.
+2. In the back office: Modules -> Module Manager -> Load module.
+3. Go to module settings.
 
 ## Configure
 
